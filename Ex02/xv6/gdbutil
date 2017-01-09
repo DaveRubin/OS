@@ -172,7 +172,7 @@ end
 document printdesc
 Print an x86 segment or gate descriptor.
 printdesc EXPR
-EXPR must evaluate to a descriptor value.  It can be of any C type.
+EXPR must evaluate to a descriptor val.  It can be of any C type.
 end
 
 define _printdesc

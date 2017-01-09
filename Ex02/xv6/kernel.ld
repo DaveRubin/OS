@@ -15,7 +15,7 @@ SECTIONS
 		*(.text .stub .text.* .gnu.linkonce.t.*)
 	}
 
-	PROVIDE(etext = .);	/* Define the 'etext' symbol to this value */
+	PROVIDE(etext = .);	/* Define the 'etext' symbol to this val */
 
 	.rodata : {
 		*(.rodata .rodata.* .gnu.linkonce.r.*)

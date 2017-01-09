@@ -5,7 +5,7 @@
 # Each non-boot CPU ("AP") is started up in response to a STARTUP
 # IPI from the boot CPU.  Section B.4.2 of the Multi-Processor
 # Specification says that the AP will start in real mode with CS:IP
-# set to XY00:0000, where XY is an 8-bit value sent with the
+# set to XY00:0000, where XY is an 8-bit val sent with the
 # STARTUP. Thus this code must start at a 4096-byte boundary.
 #
 # Because this code sets DS to zero, it must sit
