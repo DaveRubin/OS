@@ -106,7 +106,7 @@ extern int sys_sem_open(void) {
             argint(1,&init)<0 ||
             argint(2,&maxVal)<0)
         return -1;
-    cprintf("name : %s\n",name);
+    //cprintf("name : %s\n",name);
   return sem_open(name,init,maxVal);
 }
 

@@ -78,7 +78,7 @@ set(SOURCE_FILES
         xv6/usertests.c
         xv6/vm.c
         xv6/wc.c
-        xv6/zombie.c xv6/test.c xv6/test.h)
+        xv6/zombie.c xv6/test.c xv6/pc_def.c xv6/pc.c)
 add_executable(Ex02 ${SOURCE_FILES})
 #cmake_minimum_required(VERSION 2.8.4)
 #project(Ex02)
