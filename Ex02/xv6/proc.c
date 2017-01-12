@@ -148,18 +148,16 @@ fork(void) {
     np->tf->eax = 0;
 
     for (i = 0; i < NOFILE; i++) {
+
         if (proc->ofile[i])
             np->ofile[i] = filedup(proc->ofile[i]);
-        if (proc->osem[i]) {
-            //TODO - should check if got to zero
-            //struct semaphore *s = proc->osem[i];
-//            sem_open(proc->osem[i]->name);
-//            np->osem[i] = proc->osem[i];
-//            if (proc->osem[i]->ref >= proc->osem[i]->maxVal) {
-//                np->state = SLEEPING;
-//            }
+
+        if (proc->osem[i]->status == SEM_ALIVE) {
+            np->osem[i] = proc->osem[i];
+            np->osem[i]->ref++;
         }
     }
+
     np->cwd = idup(proc->cwd);
 
     pid = np->pid;
