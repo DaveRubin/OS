@@ -99,8 +99,8 @@ int sem_close(int sd) {
     }
 
     //clear the reference from the osem
+    s->ref--;
     proc->osem[sd] = 0;
-    --s->ref;
     release(&stable.gslock);
     return 0;
 }

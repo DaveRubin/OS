@@ -101,7 +101,6 @@ sys_uptime(void)
 extern int sys_sem_open(void) {
     char *name;
     int init,maxVal;
-    cprintf("YEAH ! ! ! !");
 
     if (argstr(0,&name) < 0 ||
             argint(1,&init)<0 ||
@@ -112,20 +111,59 @@ extern int sys_sem_open(void) {
 }
 
 extern int sys_sem_close(void) {
-  return sem_close(0);
+    int sd;
+
+    if (argint(0,&sd) < 0)
+        return -1;
+
+    return sem_close(sd);
 }
+
 extern int sys_sem_wait(void) {
-  return sem_wait(0);
+    int sd;
+
+    if (argint(0,&sd) < 0)
+        return -1;
+
+    return sem_wait(sd);
 }
+
 extern int sys_sem_try_wait(void) {
-  return sem_try_wait(0);
+    int sd;
+
+    if (argint(0,&sd) < 0)
+        return -1;
+
+    return sem_try_wait(sd);
 }
+
 extern int sys_sem_signal(void) {
-  return sem_signal(0);
+    int sd;
+
+    if (argint(0,&sd) < 0)
+        return -1;
+
+    return sem_signal(sd);
 }
+
 extern int sys_sem_gat_value(void) {
-  return sem_gat_value(0,0,0);
+    int sd, *val, *maxVal;
+
+
+    if (argint(0, &sd) < 0 ||
+        argptr(1, &val, sizeof(int *)) < 0 ||
+        argptr(1, &maxVal, sizeof(int *)) < 0) {
+        return -1;
+    }
+
+    return sem_gat_value(sd, val, maxVal);
 }
+
 extern int sys_sem_unlink(void) {
-  return sem_unlink(0);
+    int sd;
+
+    if (argint(0,&sd) < 0)
+        return -1;
+
+    return sem_unlink(sd);
 }
