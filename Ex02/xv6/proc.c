@@ -152,6 +152,8 @@ fork(void) {
         if (proc->ofile[i])
             np->ofile[i] = filedup(proc->ofile[i]);
 
+    }
+    for (int j = 0; j < NOSEM; ++j) {
         if (proc->osem[i]->status == SEM_ALIVE) {
             np->osem[i] = proc->osem[i];
             np->osem[i]->ref++;
@@ -182,6 +184,13 @@ exit(void) {
         if (proc->ofile[fd]) {
             fileclose(proc->ofile[fd]);
             proc->ofile[fd] = 0;
+        }
+    }
+
+    //close all open semaphores
+    for (int i = 0; i < NOSEM; ++i) {
+        if (proc->osem[fd]) {
+            sem_close(fd);
         }
     }
 

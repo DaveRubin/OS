@@ -231,7 +231,7 @@ sem_alloc(struct semaphore *s) {
     cprintf("Sem alloc! - ");
     int sd;
 
-    for (sd = 0; sd < NOFILE; sd++) {
+    for (sd = 0; sd < NOSEM; sd++) {
         if (proc->osem[sd] == 0) {
             proc->osem[sd] = s;
             cprintf("Found free osem in %d \n", sd);
