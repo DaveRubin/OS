@@ -112,17 +112,17 @@ int sem_wait(int sd) {
         return  -1;
 
     cprintf("sem_wait\n");
-    acquire(&stable.gslock);
 
     struct semaphore *s = proc->osem[sd];
+    acquire(&s->sslock);
 
     while (s->val <= 0) {
-        sleep(s, &stable.gslock);
+        sleep(s, &s->sslock);
     }
 
     s->val--;
 
-    release(&stable.gslock);
+    release(&s->sslock);
     return 0;
 }
 
@@ -130,11 +130,11 @@ int sem_try_wait(int sd) {
     cprintf("sem_try_wait\n");
     if (sd < 0 || sd >= NSEM)
         return  -1;
-    acquire(&stable.gslock);
-
     struct semaphore *s = proc->osem[sd];
+    acquire(&s->sslock);
+
     if (s->status == SEM_DEAD) {
-        release(&stable.gslock);
+        release(&s->sslock);
         return -1;
     }
 
@@ -143,7 +143,7 @@ int sem_try_wait(int sd) {
         return 0;
     }
 
-    release(&stable.gslock);
+    release(&s->sslock);
     return -1;
 }
 
@@ -151,17 +151,17 @@ int sem_try_wait(int sd) {
 int sem_signal(int sd) {
     if (sd < 0 || sd >= NSEM)
         return  -1;
-    acquire(&stable.gslock);
     struct semaphore *s = proc->osem[sd];
+    acquire(&s->sslock);
     //if sd isn't an open semaphore return -1
     if (s->status == SEM_DEAD) {
-        release(&stable.gslock);
+        release(&s->sslock);
         return -1;
     }
 
     //if val at maxVal then return -2
     if (s->val == s->maxVal) {
-        release(&stable.gslock);
+        release(&s->sslock);
         return -2;
     }
 
@@ -171,7 +171,7 @@ int sem_signal(int sd) {
     }
 
     cprintf("sem_signal\n");
-    release(&stable.gslock);
+    release(&s->sslock);
     return 0;
 }
 

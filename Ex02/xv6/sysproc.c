@@ -151,8 +151,8 @@ extern int sys_sem_gat_value(void) {
 
 
     if (argint(0, &sd) < 0 ||
-        argptr(1, &val, sizeof(int *)) < 0 ||
-        argptr(1, &maxVal, sizeof(int *)) < 0) {
+        argptr(1, (char**)&val, sizeof(int *)) < 0 ||
+        argptr(1, (char**)&maxVal, sizeof(int *)) < 0) {
         return -1;
     }
 
