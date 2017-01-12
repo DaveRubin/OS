@@ -1,20 +1,11 @@
 
-
 #include "types.h"
+#include "defs.h"
 #include "param.h"
-#include "defs.h"
+#include "spinlock.h"
+#include "mmu.h"
 #include "proc.h"
-#include "defs.h"
-#include "Defs.h"
 #include "semaphores.h"
-//
-//
-//#include "types.h"
-//#include "param.h"
-//#include "proc.h"
-//#include "defs.h"
-//#include "Defs.h"
-//#include "semaphores.h"
 
 struct {
     struct spinlock gslock; //global semaphore lock
@@ -116,8 +107,10 @@ int sem_close(int sd) {
 
 //--
 int sem_wait(int sd) {
+
     if (sd < 0 || sd >= NSEM)
         return  -1;
+
     cprintf("sem_wait\n");
     acquire(&stable.gslock);
 

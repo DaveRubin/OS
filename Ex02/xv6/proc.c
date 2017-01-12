@@ -5,6 +5,7 @@
 #include "mmu.h"
 #include "x86.h"
 #include "proc.h"
+#include "spinlock.h"
 #include "semaphores.h"
 
 struct {
@@ -151,11 +152,12 @@ fork(void) {
             np->ofile[i] = filedup(proc->ofile[i]);
         if (proc->osem[i]) {
             //TODO - should check if got to zero
-            proc->osem[i]->ref++;
-            np->osem[i] = proc->osem[i];
-            if (proc->osem[i]->ref >= proc->osem[i]->maxVal) {
-                np->state = SLEEPING;
-            }
+            //struct semaphore *s = proc->osem[i];
+//            sem_open(proc->osem[i]->name);
+//            np->osem[i] = proc->osem[i];
+//            if (proc->osem[i]->ref >= proc->osem[i]->maxVal) {
+//                np->state = SLEEPING;
+//            }
         }
     }
     np->cwd = idup(proc->cwd);

@@ -1,5 +1,5 @@
-#include "spinlock.h"
-enum STATUS {SEM_DEAD,SEM_ALIVE};
+
+enum STATUS {SEM_DEAD,SEM_ALIVE} ;
 struct semaphore {
     struct spinlock sslock; // single semaphore lock
     char name[6];
