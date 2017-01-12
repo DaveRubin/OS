@@ -90,8 +90,8 @@ exec(char *path, char **argv)
   proc->tf->esp = sp;
 
   //clear all semaphores
-  for (int j = 0; j < NOSEM; ++j) {
-      sem_close(j);
+  for ( i = 0; i < NOSEM; ++i) {
+      sem_close(i);
   }
   switchuvm(proc);
   freevm(oldpgdir);

@@ -4,7 +4,6 @@ project(Ex02)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 include_directories( ${MY_SOURCE_DIR}/xv6 )
 set(SOURCE_FILES
-        xv6/testex2.c
         xv6/semaphores.h
         xv6/semaphores.c
         xv6/bootasm.S
@@ -79,7 +78,7 @@ set(SOURCE_FILES
         xv6/usertests.c
         xv6/vm.c
         xv6/wc.c
-        xv6/zombie.c)
+        xv6/zombie.c xv6/test.c xv6/test.h)
 add_executable(Ex02 ${SOURCE_FILES})
 #cmake_minimum_required(VERSION 2.8.4)
 #project(Ex02)
