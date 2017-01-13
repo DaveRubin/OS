@@ -19,7 +19,8 @@ void seminit(void) {
 
 int sem_open(char *name, int init, int maxVal) {
 
-    cprintf("Sem open %s %d %d\n", name, init, maxVal);
+    if (SEM_VERBOSE) cprintf("Sem open %s %d %d\n", name, init, maxVal);
+    
     if (name == 0 ||
         strlen(name) > 6 ||
         init < 0 ||
@@ -55,7 +56,7 @@ int sem_open(char *name, int init, int maxVal) {
             }
         } else if (freeIndex == -1) {
             //save the first free index in the table
-            cprintf("%d",i);
+            //cprintf("%d",i);
             freeIndex = i;
         }
         i++;
@@ -65,7 +66,7 @@ int sem_open(char *name, int init, int maxVal) {
     if (freeIndex != -1) {
         s = &(stable.sem[freeIndex]);
         if (SEM_VERBOSE) cprintf("Creating new in %d\n", i);
-        cprintf("Creating new in %d\n", freeIndex);
+        //cprintf("Creating new in %d\n", freeIndex);
         //found free spot
         safestrcpy(name, s->name, sizeof(name));
         s->ref = 1;
@@ -196,7 +197,7 @@ int sem_gat_value(int sd, int *val, int *maxVal) {
     *val = s->val;
     *maxVal = s->maxVal;
     release(&stable.gslock);
-    cprintf("...%d %d \n",s->val,s->maxVal);
+    //cprintf("...%d %d \n",s->val,s->maxVal);
     return 0;
 }
 /**

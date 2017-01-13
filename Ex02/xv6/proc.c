@@ -174,7 +174,7 @@ fork(void) {
 void
 exit(void) {
     struct proc *p;
-    int fd;
+    int fd,sd;
 
     if (proc == initproc)
         panic("init exiting");
@@ -188,9 +188,9 @@ exit(void) {
     }
 
     //close all open semaphores
-    for ( fd = 0; fd < NOSEM; ++fd) {
-        if (proc->osem[fd]) {
-            sem_close(fd);
+    for ( sd = 0; sd < NOSEM; ++sd) {
+        if (proc->osem[sd]) {
+            sem_close(sd);
         }
     }
 

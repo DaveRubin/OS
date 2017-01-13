@@ -10,17 +10,22 @@
 void doProdThings();
 void doConsThings();
 
+void logAllSems();
+
 char *SEM_MAIN_NAME = "main";
 char *SEM_PRODUCER = "prod";
-char *SEM_CONSOLE = "cons";
+char *SEM_CONSUMER= "cons";
+char *SEM_CONSOLE = "cnsl";
 int messagesPerProd;
 int consoleSD;
 int prodSD;
+int consSD;
+int mainSem;
 
 int
 main(int argc, char *argv[])
 {
-    int prodCount,consCount,i,prodId;
+    int prodCount,consCount,i,childProcId;
     //char *fileName;
     //first arg is always mandatory... so 3-4 => 4-5
     if (argc != 4 &&  argc != 5) {
@@ -37,31 +42,31 @@ main(int argc, char *argv[])
     printf(2,"Starting pc with %d producers, %d consumers , and %d  messages per producer\n",
            prodCount,consCount,messagesPerProd);
     //create base semaphores
-    int mainSem = sem_open(SEM_MAIN_NAME,0,2);
+    mainSem = sem_open(SEM_MAIN_NAME,0,2);
     prodSD = sem_open(SEM_PRODUCER,0,prodCount);
+    consSD = sem_open(SEM_CONSUMER,prodCount,prodCount);
     consoleSD = sem_open(SEM_CONSOLE ,0,1);
-    printf(2,"%d %d %d\n\n",mainSem,prodSD,consoleSD);
+    logAllSems();
 
-    sem_close(prodSD);
     //create producer processes
     for (i = 0; i < prodCount; ++i) {
-        prodId = fork();
+        childProcId = fork();
         //new
-        if (prodId == 0 ) {
-//            sem_wait(mainSem);
-//            doProdThings();
-//            sem_signal(mainSem);
+        if (childProcId == 0 ) {
+            sem_wait(mainSem);
+            doProdThings();
+            sem_signal(mainSem);
             exit();
         }
     }
 
     for (i = 0; i < consCount; ++i) {
-        prodId = fork();
+        childProcId = fork();
         //new
-        if (prodId == 0 ) {
-//            sem_wait(mainSem);
-//            doConsThings();
-//            sem_signal(mainSem);
+        if (childProcId == 0 ) {
+            sem_wait(mainSem);
+            doConsThings();
+            sem_signal(mainSem);
             exit();
         }
     }
@@ -69,31 +74,44 @@ main(int argc, char *argv[])
     write_parent_msg();
     //release restriction for prod & consumer
     sem_signal(mainSem);
-    int a,b;
-    sem_gat_value(mainSem,&a,&b);
-    printf(2,"%d=== %d %d\n ",mainSem,a,b);
     sem_signal(mainSem);
-    sem_gat_value(mainSem,&a,&b);
-    printf(2,"%d=== %d %d \n",mainSem,a,b);
-    sem_signal(consoleSD);
 
     while (wait() > 0);
-    printf(2,"\nDone\n");
     exit();
 }
 
+void logAllSems() {
+    int a,b;
+    sem_gat_value(mainSem,&a,&b);
+    printf(2,"mainSem val %d , max %d\n",a,b);
+    sem_gat_value(prodSD,&a,&b);
+    printf(2,"prodSD val %d , max %d\n",a,b);
+    sem_gat_value(consSD,&a,&b);
+    printf(2,"consSD val %d , max %d\n",a,b);
+    sem_gat_value(consoleSD,&a,&b);
+    printf(2,"consoleSD val %d , max %d\n",a,b);
+}
+
 void doConsThings() {
-    //sem_wait(prodSD);
+    //wait till production signals...
+    sem_wait(prodSD);
+    //safe write
     sem_wait(consoleSD);
     write_cons_msg();
     sem_signal(consoleSD);
+    //then tell whomever wants, that a consumer have opened
+    //sem_signal(consSD);
 }
 
 void doProdThings() {
     int i;
     for (i = 0; i < messagesPerProd; ++i) {
-        sem_signal(prodSD);
 
+        //first reduce the consumer counter, if no consumers waiting, wait...
+        //sem_wait(consSD);
+        //then signal that producer message has printed
+        sem_signal(prodSD);
+        //safe write
         sem_wait(consoleSD);
         write_prod_msg();
         sem_signal(consoleSD);
