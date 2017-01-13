@@ -7,7 +7,8 @@
 #include "proc.h"
 #include "semaphores.h"
 
-#define VERBOSE 0
+#define SEM_VERBOSE 0
+
 struct {
     struct spinlock gslock; //global semaphore lock
     struct semaphore sem[NSEM];
@@ -18,7 +19,7 @@ void seminit(void) {
 
 int sem_open(char *name, int init, int maxVal) {
 
-    if (VERBOSE) cprintf("Sem open %s %d %d\n", name, init, maxVal);
+    cprintf("Sem open %s %d %d\n", name, init, maxVal);
     if (name == 0 ||
         strlen(name) > 6 ||
         init < 0 ||
@@ -34,34 +35,37 @@ int sem_open(char *name, int init, int maxVal) {
     //look for semaphore with the same name
     for (s = stable.sem; s < stable.sem + NSEM; s++) {
 
-        if (VERBOSE) cprintf("checking index %d with reference\n", i, s->ref);
-        if (s->status == SEM_ALIVE && strncmp(s->name, name, 6) == 0) {
-            if (VERBOSE) cprintf("same name \n");
-            //found
-            s->ref++;
-            //create sem in proc
-            i = sem_alloc(s);
+        if (SEM_VERBOSE) cprintf("checking index %d with reference\n", i, s->ref);
+        if (s->status == SEM_ALIVE) {
+            if (strncmp(s->name, name, 6) == 0) {
+                if (SEM_VERBOSE) cprintf("same name \n");
+                //found
+                s->ref++;
+                //create sem in proc
+                i = sem_alloc(s);
 
-            if (i < 0) {
-                //free semaphore
-                s->ref--;
+                if (i < 0) {
+                    //free semaphore
+                    s->ref--;
+                }
+                if (SEM_VERBOSE) cprintf("i = %d, sf ref %d, maxref %d\n", i, s->ref, s->maxVal);
+
+                release(&stable.gslock);
+                return i;
             }
-            if (VERBOSE) cprintf("i = %d, sf ref %d, maxref %d\n", i, s->ref, s->maxVal);
-
-            release(&stable.gslock);
-            return i;
         } else if (freeIndex == -1) {
             //save the first free index in the table
+            cprintf("%d",i);
             freeIndex = i;
         }
         i++;
     }
 
-    i = 0;
     //if not found then create one in the first free index
     if (freeIndex != -1) {
         s = &(stable.sem[freeIndex]);
-        if (VERBOSE) cprintf("Creating new in %d\n", i);
+        if (SEM_VERBOSE) cprintf("Creating new in %d\n", i);
+        cprintf("Creating new in %d\n", freeIndex);
         //found free spot
         safestrcpy(name, s->name, sizeof(name));
         s->ref = 1;
@@ -88,7 +92,7 @@ int sem_close(int sd) {
     if (sd < 0 || sd >= NSEM)
         return  -1;
 
-    if (VERBOSE) cprintf("sem_close\n");
+    if (SEM_VERBOSE) cprintf("sem_close\n");
     acquire(&stable.gslock);
 
     //get semaphore from process
@@ -107,11 +111,9 @@ int sem_close(int sd) {
 
 //--
 int sem_wait(int sd) {
-
     if (sd < 0 || sd >= NSEM)
         return  -1;
 
-    if (VERBOSE) cprintf("sem_wait\n");
 
     struct semaphore *s = proc->osem[sd];
     acquire(&s->sslock);
@@ -127,7 +129,7 @@ int sem_wait(int sd) {
 }
 
 int sem_try_wait(int sd) {
-    if (VERBOSE) cprintf("sem_try_wait\n");
+    if (SEM_VERBOSE) cprintf("sem_try_wait\n");
     if (sd < 0 || sd >= NSEM)
         return  -1;
     struct semaphore *s = proc->osem[sd];
@@ -170,7 +172,7 @@ int sem_signal(int sd) {
         wakeup(s);
     }
 
-    if (VERBOSE) cprintf("sem_signal\n");
+    if (SEM_VERBOSE) cprintf("sem_signal\n");
     release(&s->sslock);
     return 0;
 }
@@ -182,7 +184,7 @@ int sem_signal(int sd) {
 int sem_gat_value(int sd, int *val, int *maxVal) {
     if (sd < 0 || sd >= NSEM)
         return  -1;
-    if (VERBOSE) cprintf("sem_gat_value\n");
+    if (SEM_VERBOSE) cprintf("sem_gat_value\n");
     acquire(&stable.gslock);
 
     struct semaphore *s = proc->osem[sd];
@@ -194,6 +196,7 @@ int sem_gat_value(int sd, int *val, int *maxVal) {
     *val = s->val;
     *maxVal = s->maxVal;
     release(&stable.gslock);
+    cprintf("...%d %d \n",s->val,s->maxVal);
     return 0;
 }
 /**
@@ -204,7 +207,7 @@ int sem_unlink(int sd) {
     if (sd < 0 || sd >= NSEM)
         return  -1;
 
-    if (VERBOSE) cprintf("sem_unlink\n");
+    if (SEM_VERBOSE) cprintf("sem_unlink\n");
     acquire(&stable.gslock);
 
     struct semaphore *s = proc->osem[sd];
@@ -228,13 +231,13 @@ int sem_unlink(int sd) {
 
 int
 sem_alloc(struct semaphore *s) {
-    if (VERBOSE) cprintf("Sem alloc! - ");
+    if (SEM_VERBOSE) cprintf("Sem alloc! - ");
     int sd;
 
     for (sd = 0; sd < NOSEM; sd++) {
         if (proc->osem[sd] == 0) {
             proc->osem[sd] = s;
-            if (VERBOSE) cprintf("Found free osem in %d \n", sd);
+            if (SEM_VERBOSE) cprintf("Found free osem in %d \n", sd);
             return sd;
         }
     }

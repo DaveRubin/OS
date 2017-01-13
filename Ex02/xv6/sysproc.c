@@ -121,9 +121,9 @@ extern int sys_sem_close(void) {
 
 extern int sys_sem_wait(void) {
     int sd;
-
-    if (argint(0,&sd) < 0)
+    if (argint(0,&sd) < 0) {
         return -1;
+    }
 
     return sem_wait(sd);
 }
@@ -152,7 +152,7 @@ extern int sys_sem_gat_value(void) {
 
     if (argint(0, &sd) < 0 ||
         argptr(1, (char**)&val, sizeof(int *)) < 0 ||
-        argptr(1, (char**)&maxVal, sizeof(int *)) < 0) {
+        argptr(2, (char**)&maxVal, sizeof(int *)) < 0) {
         return -1;
     }
 
