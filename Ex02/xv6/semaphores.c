@@ -105,7 +105,6 @@ int sem_close(int sd) {
     }
 
     //clear the reference from the osem
-    //cprintf("Closing %s with %d refs\n",s->name,s->ref);
     s->ref--;
     proc->osem[sd] = 0;
     if (s->ref == 0) {
