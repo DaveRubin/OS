@@ -68,12 +68,13 @@ int sem_open(char *name, int init, int maxVal) {
         if (SEM_VERBOSE) cprintf("Creating new in %d\n", i);
         //cprintf("Creating new in %d\n", freeIndex);
         //found free spot
-        safestrcpy(name, s->name, sizeof(name));
+        safestrcpy(s->name, name, 6);
         s->ref = 1;
         s->val = init;
         s->maxVal = maxVal;
         s->status = SEM_ALIVE;
         initlock(&s->sslock, name);
+        //cprintf("Created %s \n",s->name);
         i = sem_alloc(s);
 
         if (i < 0) {
@@ -104,8 +105,12 @@ int sem_close(int sd) {
     }
 
     //clear the reference from the osem
+    //cprintf("Closing %s with %d refs\n",s->name,s->ref);
     s->ref--;
     proc->osem[sd] = 0;
+    if (s->ref == 0) {
+        wakeup(s);
+    }
     release(&stable.gslock);
     return 0;
 }
@@ -143,6 +148,7 @@ int sem_try_wait(int sd) {
 
     if (s->val > 0) {
         s->val--;
+        release(&s->sslock);
         return 0;
     }
 
@@ -208,7 +214,7 @@ int sem_unlink(int sd) {
     if (sd < 0 || sd >= NSEM)
         return  -1;
 
-    if (SEM_VERBOSE) cprintf("sem_unlink\n");
+    if (SEM_VERBOSE || 1) cprintf("sem_unlink\n");
     acquire(&stable.gslock);
 
     struct semaphore *s = proc->osem[sd];
@@ -219,6 +225,7 @@ int sem_unlink(int sd) {
 
     //run through all processes and remove sd from them
     while (s->ref > 0 ) {
+        cprintf("Ref count for %s is %d... sleeping\n",s->name,s->ref);
         sleep(s,&stable.gslock);
     }
 

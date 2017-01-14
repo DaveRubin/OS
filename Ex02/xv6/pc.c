@@ -6,47 +6,64 @@
 #include "stat.h"
 #include "user.h"
 #include "pc_def.c"
+#include "fcntl.h"
 
 void doProdThings();
 
 void doConsThings();
 
 void logAllSems();
+void cleanup();
 
 char *SEM_MAIN_NAME = "main";
 char *SEM_PRODUCER = "prod";
 char *SEM_CONSUMER = "cons";
 char *SEM_CONSOLE = "cnsl";
+char *SEM_MESSAGES = "msgs";
 int messagesPerProd;
 int consoleSD;
-int prodSD;
-int consSD;
+int producerSD;
+int consumerSD;
 int mainSem;
-
+int totalMessagesSD;
 
 int
 main(int argc, char *argv[]) {
     int prodCount, consCount, i, childProcId;
+    int newFD = -1;
     //char *fileName;
     //first arg is always mandatory... so 3-4 => 4-5
     if (argc != 4 && argc != 5) {
-        printf(2, "%d Not enought arguments!!\n", argc);
+        printf(1, "%d Not enought arguments!!\n", argc);
         exit();
     }
+    int fd = open("XXXX",O_RDWR);
+    if (fd>= 0 ) {
+        printf(fd,"AAAAA");
+    }
+
     prodCount = atoi(argv[1]);
     consCount = atoi(argv[2]);
     messagesPerProd = atoi(argv[3]);
-    if (argc == 5) {
-        //fileName = argv[4];
+    if(argc == 5){
+        
+        if((fd = open(argv[4], O_CREATE | O_RDWR)) < 0){
+            printf(1,"filed to create the supplied file\n");
+            return -1;
+        }
+        
+        close(1);
+        newFD = dup(fd);
+        close(fd);
     }
 
-    printf(2, "Starting pc with %d producers, %d consumers , and %d  messages per producer\n",
-           prodCount, consCount, messagesPerProd);
     //create base semaphores
+    int totalMessages = prodCount*messagesPerProd;
     mainSem = sem_open(SEM_MAIN_NAME, 0, 2);
-    prodSD = sem_open(SEM_PRODUCER, 0, prodCount);
-    consSD = sem_open(SEM_CONSUMER, consCount, consCount);
+    producerSD = sem_open(SEM_PRODUCER, prodCount, prodCount);
+    consumerSD = sem_open(SEM_CONSUMER, 0, consCount);
     consoleSD = sem_open(SEM_CONSOLE, 1, 1);
+    totalMessagesSD = sem_open(SEM_MESSAGES, totalMessages, totalMessages);
     //logAllSems();
 
     //PRODUCERS
@@ -64,9 +81,8 @@ main(int argc, char *argv[]) {
             }
         }
 
-        doProdThings();
-
         while (wait() > 0);
+
         exit();
     }
 
@@ -87,6 +103,7 @@ main(int argc, char *argv[]) {
         }
 
         while (wait() > 0);
+
         exit();
     }
 
@@ -97,49 +114,77 @@ main(int argc, char *argv[]) {
     sem_signal(mainSem);
 
     while (wait() > 0);
+    if (newFD != -1) {
+        close(newFD);
+    }
+    //cleanup();
     exit();
 }
 
 void logAllSems() {
     int a, b;
     sem_gat_value(mainSem, &a, &b);
-    printf(2, "mainSem val %d , max %d\n", a, b);
-    sem_gat_value(prodSD, &a, &b);
-    printf(2, "prodSD val %d , max %d\n", a, b);
-    sem_gat_value(consSD, &a, &b);
-    printf(2, "consSD val %d , max %d\n", a, b);
+    printf(1, "mainSem val %d , max %d\n", a, b);
+    sem_gat_value(producerSD, &a, &b);
+    printf(1, "producerSD val %d , max %d\n", a, b);
+    sem_gat_value(consumerSD, &a, &b);
+    printf(1, "consumerSD val %d , max %d\n", a, b);
     sem_gat_value(consoleSD, &a, &b);
-    printf(2, "consoleSD val %d , max %d\n", a, b);
+    printf(1, "consoleSD val %d , max %d\n", a, b);
+    sem_gat_value(totalMessagesSD, &a, &b);
+    printf(1, "totalMessagesSD val %d , max %d\n", a, b);
 }
 
 void doConsThings() {
-    //consume messages while messages are waiting, when messages are done done
-    printf(2, "Cons...");
-    //wait till production signals...
-    sem_wait(prodSD);
-    //safe write
-    sem_wait(consoleSD);
-    write_cons_msg();
-    sem_signal(consoleSD);
-    //then tell whomever wants, that a consumer have opened
-    sem_signal(consSD);
-    //wait for done
-    //if done, check
+
+    int loop = sem_try_wait(totalMessagesSD) >= 0;
+
+    while (loop) {
+        //while not done, return
+        //consume messages while messages are waiting, when messages are done done
+        sem_wait(consumerSD);
+        //safe write
+        sem_wait(consoleSD);
+        write_cons_msg();
+        sem_signal(consoleSD);
+        loop = sem_try_wait(totalMessagesSD) >= 0; //when no more total messages leave do consThings
+    }
+
 }
 
 void doProdThings() {
     int i;
     for (i = 0; i < messagesPerProd; ++i) {
 
-        //first reduce the consumer counter, if no consumers waiting, wait...
-        sem_wait(consSD);
-        //then signal that producer message has printed
-        sem_signal(prodSD);
+        sem_wait(producerSD);
         //safe write
         sem_wait(consoleSD);
         write_prod_msg();
         sem_signal(consoleSD);
-    }
 
-    sem_close(prodSD);
+        sem_signal(consumerSD); //free one consumer lock
+        sem_signal(producerSD); //free the taken producer lock
+    }
+}
+
+void cleanup() {
+    printf(1,"A\n");
+    sem_close(mainSem);
+    sem_unlink(mainSem);
+
+    printf(1,"A\n");
+    sem_close(producerSD);
+    sem_unlink(producerSD);
+
+    printf(1,"A\n");
+    sem_close(consumerSD);
+    sem_unlink(consumerSD);
+
+    printf(1,"A\n");
+    sem_close(consoleSD);
+    sem_unlink(consoleSD);
+
+    printf(1,"A\n");
+    sem_close(totalMessagesSD);
+    sem_unlink(totalMessagesSD);
 }
