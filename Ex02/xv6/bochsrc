@@ -91,7 +91,7 @@ romimage: file=$BXSHARE/BIOS-bochs-latest
 #  Emulated Instructions Per Second.  This is the number of IPS that bochs
 #  is capable of running on your machine. You can recompile Bochs with
 #  --enable-show-ips option enabled, to find your workstation's capability.
-#  Measured IPS val will then be logged into your log file or status bar
+#  Measured IPS value will then be logged into your log file or status bar
 #  (if supported by the gui).
 #
 #  IPS is used to calibrate many time-dependent events within the bochs 
@@ -107,7 +107,7 @@ romimage: file=$BXSHARE/BIOS-bochs-latest
 #  650Mhz Athlon K-7 with Linux 2.4.4/egcs-2.91.66  2 to  2.5 Mips
 #  400Mhz Pentium II with Linux 2.0.36/egcs-1.0.3   1 to  1.8 Mips
 #=======================================================================
-cpu: count=2, ips=10000000
+cpu: count=1, ips=10000000
 
 #=======================================================================
 # MEGS
@@ -118,7 +118,7 @@ cpu: count=2, ips=10000000
 #megs: 256
 #megs: 128
 #megs: 64
-megs: 32
+megs: 300 
 #megs: 16
 #megs: 8
 
@@ -153,7 +153,7 @@ vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
 
 #=======================================================================
 # VGA:
-# Here you can specify the display extension to be used. With the val
+# Here you can specify the display extension to be used. With the value
 # 'none' you can use standard VGA with no extension. Other supported
 # values are 'vbe' for Bochs VBE and 'cirrus' for Cirrus SVGA support.
 #=======================================================================
@@ -301,7 +301,7 @@ boot: disk
 #
 #  TIME0:
 #  Specifies the start (boot) time of the virtual machine. Use a time 
-#  val as returned by the time(2) system call. If no time0 val is
+#  value as returned by the time(2) system call. If no time0 value is 
 #  set or if time0 equal to 1 (special case) or if time0 equal 'local', 
 #  the simulation will be started at the current local host time.
 #  If time0 equal to 2 (special case) or if time0 equal 'utc',
@@ -319,7 +319,7 @@ boot: disk
 #   clock: sync=none,     time0=1           # Now (localtime)
 #   clock: sync=none,     time0=utc         # Now (utc/gmt)
 # 
-# Default val are sync=none, time0=local
+# Default value are sync=none, time0=local
 #=======================================================================
 #clock: sync=none, time0=local
 
@@ -444,13 +444,13 @@ debugger_log: -
 #   parport2: enabled=1, file="/dev/lp0"
 #   parport1: enabled=0
 #=======================================================================
-parport1: enabled=1, file="/dev/stdout"
+#parport1: enabled=1, file="/dev/stdout"
 
 #=======================================================================
 # SB16:
 # This defines the SB16 sound emulation. It can have several of the
 # following properties.
-# All properties are in the format sb16: property=val
+# All properties are in the format sb16: property=value
 # midi: The filename is where the midi data is sent. This can be a
 #       device or just a file if you want to record the midi data.
 # midimode:
@@ -475,7 +475,7 @@ parport1: enabled=1, file="/dev/stdout"
 #      5=all errors and port accesses plus a lot of extra info
 # dmatimer:
 #      microseconds per second for a DMA cycle.  Make it smaller to fix
-#      non-continuous sound.  750000 is usually a good val.  This needs a
+#      non-continuous sound.  750000 is usually a good value.  This needs a
 #      reasonably correct setting for the IPS parameter of the CPU option.
 #
 # For an example look at the next line:
@@ -494,7 +494,7 @@ parport1: enabled=1, file="/dev/stdout"
 # Examples:
 #   vga_update_interval: 250000
 #=======================================================================
-vga_update_interval: 300000
+#vga_update_interval: 300000
 
 # using for Winstone '98 tests
 #vga_update_interval:  100000
@@ -506,7 +506,7 @@ vga_update_interval: 300000
 # Examples:
 #   keyboard_serial_delay: 200
 #=======================================================================
-keyboard_serial_delay: 250
+#keyboard_serial_delay: 250
 
 #=======================================================================
 # KEYBOARD_PASTE_DELAY:
@@ -523,7 +523,7 @@ keyboard_serial_delay: 250
 # Examples:
 #   keyboard_paste_delay: 100000
 #=======================================================================
-keyboard_paste_delay: 100000
+#keyboard_paste_delay: 100000
 
 #=======================================================================
 # MOUSE: 
@@ -535,7 +535,7 @@ keyboard_paste_delay: 100000
 # You can also toggle the mouse usage at runtime (control key + middle
 # mouse button on X11, SDL, wxWidgets and Win32).
 # With the mouse type option you can select the type of mouse to emulate.
-# The default val is 'ps2'. The other choices are 'imps2' (wheel mouse
+# The default value is 'ps2'. The other choices are 'imps2' (wheel mouse
 # on PS/2), 'serial', 'serial_wheel' (one com port requires setting
 # 'mode=mouse') and 'usb' (3-button mouse - one of the USB ports must be
 # connected with the 'mouse' device - requires PCI and USB support).
@@ -588,13 +588,13 @@ private_colormap: enabled=0
 # address.  For the ethertap module, you must use fe:fd:00:00:00:01.  There may
 # be other restrictions too.  To be safe, just use the b0:c4... address.
 #
-# ethdev: The ethdev val is the name of the network interface on your host
+# ethdev: The ethdev value is the name of the network interface on your host
 # platform.  On UNIX machines, you can get the name by running ifconfig.  On
 # Windows machines, you must run niclist to get the name of the ethdev.
 # Niclist source code is in misc/niclist.c and it is included in Windows 
 # binary releases.
 #
-# script: The script val is optional, and is the name of a script that
+# script: The script value is optional, and is the name of a script that 
 # is executed after bochs initialize the network interface. You can use 
 # this script to configure this network interface, or enable masquerading.
 # This is mainly useful for the tun/tap devices that only exist during
@@ -609,7 +609,7 @@ private_colormap: enabled=0
 #   vnet: ARP, ICMP-echo(ping), DHCP and read/write TFTP are simulated.
 #         The virtual host uses 192.168.10.1.
 #         DHCP assigns 192.168.10.2 to the guest.
-#         TFTP uses the ethdev val for the root directory and doesn't
+#         TFTP uses the ethdev value for the root directory and doesn't
 #         overwrite files.
 #
 #=======================================================================
@@ -632,7 +632,7 @@ private_colormap: enabled=0
 # Examples:
 #   keyboard_mapping: enabled=1, map=gui/keymaps/x11-pc-de.map
 #=======================================================================
-keyboard_mapping: enabled=0, map=
+#keyboard_mapping: enabled=0, map=
 
 #=======================================================================
 # KEYBOARD_TYPE:
@@ -717,7 +717,7 @@ keyboard_mapping: enabled=0, map=
 #=======================================================================
 # GDBSTUB:
 # Enable GDB stub. See user documentation for details.
-# Default val is enabled=0.
+# Default value is enabled=0.
 #=======================================================================
 #gdbstub: enabled=0, port=1234, text_base=0, data_base=0, bss_base=0
 
