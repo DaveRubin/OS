@@ -1,0 +1,21 @@
+OS Ex 02
+David rubin 039532908
+
+basically most of the semaphore functions were inspired by "file" functions...
+used the defs of NOSEM and NSEM as told,
+*i inserted proc behaviour to the semaphore.c mtheds not like the file syscalls
+    also input validation is only in the semaphore.c methods (in file it is validated in the syscall methods)z
+
+for the user program, i used 5 semaphores
+    -mainSem : unlocks once the main thread finished creating all child process
+    -producerSD : max value is the producers count, and once producer is active, the value is lowered (with wait)
+        once finished, it is raised back to its old value
+    -totalMessagesSD :  has max value for total messages, and lowered with each producer message,
+        when reaches 0 consumer stops consuming
+    -consumerSD : similar to producer,maxvalue for consumers count, when consumer starts consuming, lowered,
+        and raised back once done
+    -consoleSD : locks each print to prevent mixed console prints...
+
+well.. that's about it... i had troubles with unlinking at the end.. didn't had enough time to dive into that...
+hope it isn't only a side effect of a bigger bug in the semaphore flow...
+:(
