@@ -9,7 +9,4 @@
 #define ROOTDEV       1  // device number of file system root disk
 #define MAXARG       32  // max exec arguments
 #define LOGSIZE      10  // max data sectors in on-disk log
-//custom
-#define NSEM         10  // Number of semphores
-#define NOSEM        10  // max open semphores
 

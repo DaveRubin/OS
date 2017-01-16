@@ -21,11 +21,3 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 #define SYS_testKern  22
-#define SYS_sem_open        23
-#define SYS_sem_close       24
-#define SYS_sem_wait        25
-#define SYS_sem_try_wait    26
-#define SYS_sem_signal      27
-#define SYS_sem_gat_value   28
-#define SYS_sem_unlink      29
-

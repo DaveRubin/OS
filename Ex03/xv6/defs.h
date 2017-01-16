@@ -4,7 +4,6 @@ struct file;
 struct inode;
 struct pipe;
 struct proc;
-struct semaphore;
 struct spinlock;
 struct stat;
 struct superblock;
@@ -20,15 +19,6 @@ void            consoleinit(void);
 void            cprintf(char*, ...);
 void            consoleintr(int(*)(void));
 void            panic(char*) __attribute__((noreturn));
-//semaphores.c
-void seminit(void);
-int sem_open(char *, int, int);
-int sem_close(int );
-int sem_wait(int );
-int sem_try_wait(int);
-int sem_signal(int );
-int sem_gat_value(int , int *, int* );
-int sem_unlink(int );
 
 // exec.c
 int             exec(char*, char**);

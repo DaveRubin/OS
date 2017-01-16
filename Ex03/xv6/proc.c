@@ -6,7 +6,6 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
-#include "semaphores.h"
 
 struct {
     struct spinlock lock;
@@ -153,12 +152,6 @@ fork(void) {
             np->ofile[i] = filedup(proc->ofile[i]);
 
     }
-    for (i = 0; i < NOSEM; ++i) {
-        if (proc->osem[i]->status == SEM_ALIVE) {
-            np->osem[i] = proc->osem[i];
-            np->osem[i]->ref++;
-        }
-    }
 
     np->cwd = idup(proc->cwd);
 
@@ -174,7 +167,7 @@ fork(void) {
 void
 exit(void) {
     struct proc *p;
-    int fd,sd;
+    int fd;
 
     if (proc == initproc)
         panic("init exiting");
@@ -184,13 +177,6 @@ exit(void) {
         if (proc->ofile[fd]) {
             fileclose(proc->ofile[fd]);
             proc->ofile[fd] = 0;
-        }
-    }
-
-    //close all open semaphores
-    for ( sd = 0; sd < NOSEM; ++sd) {
-        if (proc->osem[sd]) {
-            sem_close(sd);
         }
     }
 

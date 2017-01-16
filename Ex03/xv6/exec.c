@@ -89,10 +89,6 @@ exec(char *path, char **argv)
   proc->tf->eip = elf.entry;  // main
   proc->tf->esp = sp;
 
-  //clear all semaphores
-  for ( i = 0; i < NOSEM; ++i) {
-      sem_close(i);
-  }
   switchuvm(proc);
   freevm(oldpgdir);
   return 0;
