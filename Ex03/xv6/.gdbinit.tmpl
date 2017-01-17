@@ -13,7 +13,7 @@ define hook-stop
     if $lastcs == -1 || $lastcs == 8 || $lastcs == 35
       set architecture i8086
     end
-    # Translate the segment:offset into a physical address
+    # Translate the segment:off into a physical address
     printf "[%4x:%4x] ", $cs, $eip
     x/i $cs*16+$eip
   end

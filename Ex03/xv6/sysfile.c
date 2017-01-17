@@ -286,8 +286,9 @@ sys_open(void)
 
   if(argstr(0, &path) < 0 || argint(1, &omode) < 0)
     return -1;
-  if(omode & O_CREATE){
+  if (omode & O_CREATE) {
     begin_trans();
+    cprintf("Create!");
     ip = create(path, T_FILE, 0, 0);
     commit_trans();
     if(ip == 0)
@@ -312,7 +313,14 @@ sys_open(void)
 
   f->type = FD_INODE;
   f->ip = ip;
-  f->off = 0;
+  if (omode & O_APPEND) {
+      cprintf("Appending\n");
+    f->off = ip->off;
+  }
+  else {
+      cprintf("Writing\n");
+    f->off = 0;
+  }
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
   return fd;

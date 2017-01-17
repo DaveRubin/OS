@@ -201,19 +201,21 @@ ialloc(uint dev, short type)
 void
 iupdate(struct inode *ip)
 {
-  struct buf *bp;
-  struct dinode *dip;
+    struct buf *bp;
+    struct dinode *dip;
 
-  bp = bread(ip->dev, IBLOCK(ip->inum));
-  dip = (struct dinode*)bp->data + ip->inum%IPB;
-  dip->type = ip->type;
-  dip->major = ip->major;
-  dip->minor = ip->minor;
-  dip->nlink = ip->nlink;
-  dip->size = ip->size;
-  memmove(dip->addrs, ip->addrs, sizeof(ip->addrs));
-  log_write(bp);
-  brelse(bp);
+    bp = bread(ip->dev, IBLOCK(ip->inum));
+    dip = (struct dinode*)bp->data + ip->inum%IPB;
+    dip->type = ip->type;
+    dip->major = ip->major;
+    dip->minor = ip->minor;
+    dip->nlink = ip->nlink;
+    dip->size = ip->size;
+    dip->off = ip->off;
+    memmove(dip->addrs, ip->addrs, sizeof(ip->addrs));
+    log_write(bp);
+    //cprintf("Offset - %d  %d\n",dip->off,ip->off);
+    brelse(bp);
 }
 
 // Find the inode with number inum on device dev
@@ -486,6 +488,7 @@ writei(struct inode *ip, char *src, uint off, uint n)
 
   if(n > 0 && off > ip->size){
     ip->size = off;
+      ip->off = off;
     iupdate(ip);
   }
   return n;
@@ -501,7 +504,7 @@ namecmp(const char *s, const char *t)
 }
 
 // Look for a directory entry in a directory.
-// If found, set *poff to byte offset of entry.
+// If found, set *poff to byte off of entry.
 struct inode*
 dirlookup(struct inode *dp, char *name, uint *poff)
 {

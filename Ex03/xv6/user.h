@@ -10,14 +10,6 @@ int read(int, void*, int);
 int close(int);
 int kill(int);
 int testKern(int);
-//EX2 prototypes
-int sem_open(char *, int, int);
-int sem_close(int );
-int sem_wait(int );
-int sem_try_wait(int);
-int sem_signal(int );
-int sem_gat_value(int , int *, int* );
-int sem_unlink(int );
 
 int exec(char*, char**);
 int open(char*, int);
