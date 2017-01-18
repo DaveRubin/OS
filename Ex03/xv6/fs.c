@@ -211,7 +211,6 @@ iupdate(struct inode *ip)
     dip->minor = ip->minor;
     dip->nlink = ip->nlink;
     dip->size = ip->size;
-    dip->off = ip->off;
     memmove(dip->addrs, ip->addrs, sizeof(ip->addrs));
     log_write(bp);
     //cprintf("Offset - %d  %d\n",dip->off,ip->off);
@@ -486,9 +485,9 @@ writei(struct inode *ip, char *src, uint off, uint n)
     brelse(bp);
   }
 
-  if(n > 0 && off > ip->size){
+  if(n > 0 && off > ip->size) {
     ip->size = off;
-      ip->off = off;
+    ip->off = off;
     iupdate(ip);
   }
   return n;

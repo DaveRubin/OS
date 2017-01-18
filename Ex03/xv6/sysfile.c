@@ -288,8 +288,8 @@ sys_open(void)
     return -1;
   if (omode & O_CREATE) {
     begin_trans();
-    cprintf("Create!");
     ip = create(path, T_FILE, 0, 0);
+    ip->size = 0;
     commit_trans();
     if(ip == 0)
       return -1;
@@ -315,7 +315,7 @@ sys_open(void)
   f->ip = ip;
   if (omode & O_APPEND) {
       cprintf("Appending\n");
-    f->off = ip->off;
+    f->off = ip->size;
   }
   else {
       cprintf("Writing\n");

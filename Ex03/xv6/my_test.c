@@ -39,15 +39,15 @@ main(int argc, char *argv[]) {
     }
     printf(fd,"\nSecond time... hmmm \n");
 
-    close(fd);
-
-    fd = open("Z",O_RDWR | O_CREATE);
-    if (fd<0) {
-        printf(1,"failed opening file...\n");
-        exit();
-    }
-
-    printf(fd,"Another one bites the dust...\n");
+//    close(fd);
+//
+//    fd = open("Z",O_RDWR | O_CREATE);
+//    if (fd<0) {
+//        printf(1,"failed opening file...\n");
+//        exit();
+//    }
+//
+//    printf(fd,"Another one bites the dust...\n");
 
     close(fd);
     exit();
