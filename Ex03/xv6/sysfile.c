@@ -278,7 +278,6 @@ sys_open(void) {
     if (omode & O_CREATE) {
         begin_trans();
         ip = create(path, T_FILE, 0, 0);
-        ip->size = 0;
         commit_trans();
         if (ip == 0)
             return -1;
@@ -303,7 +302,6 @@ sys_open(void) {
     f->type = FD_INODE;
     f->ip = ip;
 
-    cprintf("Opening file size %d \n", ip->size);
     if ((omode & O_APPEND) && !(omode & O_RDONLY)) {
         f->off = ip->size;
     } else {

@@ -54,15 +54,23 @@ void testAppend() {
     write(fd,"\nSecond time... hmmm \n", sizeof("\nSecond time... hmmm \n"));
 
     close(fd);
-//
-//    fd = open("Z",O_RDWR | O_CREATE);
-//    if (fd<0) {
-//        printf(1,"failed opening file...\n");
-//        exit();
-//    }
-//
-//    //write(fd,"Another one bites the dust...\n", sizeof("Another one bites the dust...\n"));
-//    write(fd,"Another one bites the dust...\n", 513);
-//
-//    close(fd);
+
+    fd = open("Z",O_RDWR | O_CREATE);
+    if (fd<0) {
+        printf(1,"failed opening file...\n");
+        exit();
+    }
+
+    write(fd,"Another one bites the dust...\n", sizeof("Another one bites the dust...\n"));
+
+    close(fd);
+    fd = open("Z",O_WRONLY | O_CREATE | O_APPEND );
+    if (fd<0) {
+        printf(1,"failed opening file...\n");
+        exit();
+    }
+
+    write(fd,"\nSecond time... hmmm X2\n", sizeof("\nSecond time... hmmm X2\n"));
+
+    close(fd);
 }
