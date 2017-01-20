@@ -7,70 +7,72 @@
 #include "user.h"
 #include "fcntl.h"
 
-#define XNDIRECT 11
-
-// On-disk inode structure
-struct xxx {
-    short type;           // File type
-    short major;          // Major device number (T_DEV only)
-    short minor;          // Minor device number (T_DEV only)
-    short nlink;          // Number of links to inode in file system
-    uint size;            // Size of file (bytes)
-    uint off;
-    uint addrs[XNDIRECT+1];   // Data block addresses
-};
-
+char *appendTestFileName = "a";
+char *blockTestFileName = "b";
+char *deleteRangeFileName = "c";
 void testAppend();
 
 void testBlockWrite();
 
 int
 main(int argc, char *argv[]) {
-    printf(1,"YO YO %d\n\n\n", sizeof(struct xxx));
     testAppend();
-    //testBlockWrite();
+    testBlockWrite();
     exit();
 }
 
 void testBlockWrite() {
+    char *string = "Testing block write...";
+    int fd = open(blockTestFileName,O_WRONLY | O_CREATE | O_BLOCK_WRITE);
+    if (fd<0) {
+        printf(1,"failed opening file...\n");
+        exit();
+    }
 
+    write(fd,string, strlen(string));
+
+    close(fd);
 }
 
 void testAppend() {
+    char *s1 = "Append Test - Hi there\n";
+    char *s2 = "Append Test - Second time... hmmm \n";
+    char *s3 = "Append Test - Another one bites the dust...\n";
+    char *s4 = "Append Test - fourth time a charm... \n";
     int fd = open("Z",O_RDWR | O_CREATE );
     if (fd<0) {
         write(1,"failed opening file...\n", sizeof("failed opening file...\n"));
         exit();
     }
-    write(fd,"Hi there\n", 9);
+    write(fd,s1, strlen(s1));
     close(fd);
 
-    fd = open("Z",O_WRONLY | O_CREATE | O_APPEND );
+    fd = open(appendTestFileName,O_WRONLY | O_CREATE | O_APPEND );
     if (fd<0) {
         printf(1,"failed opening file...\n");
         exit();
     }
 
-    write(fd,"\nSecond time... hmmm \n", sizeof("\nSecond time... hmmm \n"));
+    write(fd,s2, strlen(s2));
 
     close(fd);
 
-    fd = open("Z",O_RDWR | O_CREATE);
+    fd = open(appendTestFileName,O_RDWR | O_CREATE);
     if (fd<0) {
         printf(1,"failed opening file...\n");
         exit();
     }
 
-    write(fd,"Another one bites the dust...\n", sizeof("Another one bites the dust...\n"));
+    write(fd,s3, strlen(s3));
 
     close(fd);
-    fd = open("Z",O_WRONLY | O_CREATE | O_APPEND );
+    fd = open(appendTestFileName,O_WRONLY | O_CREATE | O_APPEND );
     if (fd<0) {
         printf(1,"failed opening file...\n");
         exit();
     }
 
-    write(fd,"\nSecond time... hmmm X2\n", sizeof("\nSecond time... hmmm X2\n"));
+    write(fd,s4, strlen(s4));
 
     close(fd);
 }

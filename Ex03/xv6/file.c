@@ -154,10 +154,9 @@ filewrite(struct file *f, char *addr, int n) {
             i += r;
         }
         int spare = BLOCK_COMPELET - (n % BLOCK_COMPELET);
-
-
+        //ADDITION !
         if (f->blockwrite && spare) {
-            cprintf("N is %d Spare is %d \n",n,spare);
+            //cprintf("N is %d Spare is %d \n",n,spare);
             begin_trans();
             ilock(f->ip);
             if ((r = writei(f->ip, blockfiller, f->off, spare)) > 0)
