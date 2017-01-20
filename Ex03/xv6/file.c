@@ -172,3 +172,9 @@ filewrite(struct file *f, char *addr, int n) {
     panic("filewrite");
 }
 
+
+int
+delete_range(int fd ,int from,int to) {
+    //cprintf("HEllo from delete range!\n %d %d %d",fd ,from,to);
+    return 1;
+}

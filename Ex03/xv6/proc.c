@@ -446,10 +446,6 @@ procdump(void) {
     }
 }
 
-int
-testKern(int val) {
-    return val * 2;
-}
 
 
 int sem_open(char *name, int init, int maxVal);

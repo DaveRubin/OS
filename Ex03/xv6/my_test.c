@@ -14,11 +14,18 @@ void testAppend();
 
 void testBlockWrite();
 
+void testDeleteRange();
+
 int
 main(int argc, char *argv[]) {
     testAppend();
     testBlockWrite();
+    testDeleteRange();
     exit();
+}
+
+void testDeleteRange() {
+    delete_range(2,4,6);
 }
 
 void testBlockWrite() {

@@ -36,12 +36,13 @@ sys_kill(void)
 }
 
 int
-sys_testKern(void) {
-  int num;
+sys_delete_range(void) {
+  int fd,from,till;
 
-  if(argint(0, &num) < 0)
+  if(argint(0, &fd) < 0 || argint(1, &from) < 0 || argint(2, &till) < 0)
     return -1;
-  return testKern(num);
+
+  return delete_range(fd,from,till);
 }
 
 int

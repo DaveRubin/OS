@@ -31,6 +31,7 @@ void            fileinit(void);
 int             fileread(struct file*, char*, int n);
 int             filestat(struct file*, struct stat*);
 int             filewrite(struct file*, char*, int n);
+int             delete_range(int,int,int);
 
 // fs.c
 void            readsb(int dev, struct superblock *sb);
@@ -107,7 +108,6 @@ void            exit(void);
 int             fork(void);
 int             growproc(int);
 int             kill(int);
-int             testKern(int);
 void            pinit(void);
 void            procdump(void);
 void            scheduler(void) __attribute__((noreturn));

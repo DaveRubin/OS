@@ -9,7 +9,7 @@ int write(int, void*, int);
 int read(int, void*, int);
 int close(int);
 int kill(int);
-int testKern(int);
+int delete_range(int,int,int);
 
 int exec(char*, char**);
 int open(char*, int);
