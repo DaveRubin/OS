@@ -20,26 +20,40 @@ struct xxx {
     uint addrs[XNDIRECT+1];   // Data block addresses
 };
 
+void testAppend();
+
+void testBlockWrite();
+
 int
 main(int argc, char *argv[]) {
     printf(1,"YO YO %d\n\n\n", sizeof(struct xxx));
-    int fd = open("Z",O_RDWR | O_CREATE);
+    testAppend();
+    //testBlockWrite();
+    exit();
+}
+
+void testBlockWrite() {
+
+}
+
+void testAppend() {
+    int fd = open("Z",O_RDWR | O_CREATE );
     if (fd<0) {
-        printf(1,"failed opening file...\n");
+        write(1,"failed opening file...\n", sizeof("failed opening file...\n"));
         exit();
     }
-
-    printf(fd,"YO YO YO !! ! ! ! \n");
+    write(fd,"Hi there\n", 9);
     close(fd);
 
-    fd = open("Z",O_RDWR | O_CREATE |O_APPEND);
+    fd = open("Z",O_WRONLY | O_CREATE | O_APPEND );
     if (fd<0) {
         printf(1,"failed opening file...\n");
         exit();
     }
-    printf(fd,"\nSecond time... hmmm \n");
 
-//    close(fd);
+    write(fd,"\nSecond time... hmmm \n", sizeof("\nSecond time... hmmm \n"));
+
+    close(fd);
 //
 //    fd = open("Z",O_RDWR | O_CREATE);
 //    if (fd<0) {
@@ -47,8 +61,8 @@ main(int argc, char *argv[]) {
 //        exit();
 //    }
 //
-//    printf(fd,"Another one bites the dust...\n");
-
-    close(fd);
-    exit();
+//    //write(fd,"Another one bites the dust...\n", sizeof("Another one bites the dust...\n"));
+//    write(fd,"Another one bites the dust...\n", 513);
+//
+//    close(fd);
 }

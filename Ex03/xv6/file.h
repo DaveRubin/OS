@@ -1,11 +1,12 @@
 struct file {
-  enum { FD_NONE, FD_PIPE, FD_INODE } type;
-  int ref; // reference count
-  char readable;
-  char writable;
-  struct pipe *pipe;
-  struct inode *ip;
-  uint off;
+    enum { FD_NONE, FD_PIPE, FD_INODE } type;
+    int ref; // reference count
+    char readable;
+    char writable;
+    char blockwrite;
+    struct pipe *pipe;
+    struct inode *ip;
+    uint off;
 };
 
 

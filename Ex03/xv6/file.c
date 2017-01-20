@@ -9,16 +9,21 @@
 #include "file.h"
 #include "spinlock.h"
 
+#define BLOCK_COMPELET 512
+
 struct devsw devsw[NDEV];
 struct {
   struct spinlock lock;
   struct file file[NFILE];
 } ftable;
 
+char blockfiller[512] = "\0";
+
 void
 fileinit(void)
 {
-  initlock(&ftable.lock, "ftable");
+    initlock(&ftable.lock, "ftable");
+    memset(blockfiller, '_', BLOCK_COMPELET);
 }
 
 // Allocate a file structure.
@@ -114,43 +119,57 @@ fileread(struct file *f, char *addr, int n)
 //PAGEBREAK!
 // Write to file f.
 int
-filewrite(struct file *f, char *addr, int n)
-{
-  int r;
+filewrite(struct file *f, char *addr, int n) {
+    int r;
 
-  if(f->writable == 0)
-    return -1;
-  if(f->type == FD_PIPE)
-    return pipewrite(f->pipe, addr, n);
-  if(f->type == FD_INODE){
-    // write a few blocks at a time to avoid exceeding
-    // the maximum log transaction size, including
-    // i-node, indirect block, allocation blocks,
-    // and 2 blocks of slop for non-aligned writes.
-    // this really belongs lower down, since writei()
-    // might be writing a device like the console.
-    int max = ((LOGSIZE-1-1-2) / 2) * 512;
-    int i = 0;
-    while(i < n){
-      int n1 = n - i;
-      if(n1 > max)
-        n1 = max;
+    if (f->writable == 0)
+        return -1;
+    if (f->type == FD_PIPE)
+        return pipewrite(f->pipe, addr, n);
+    if (f->type == FD_INODE) {
+        // write a few blocks at a time to avoid exceeding
+        // the maximum log transaction size, including
+        // i-node, indirect block, allocation blocks,
+        // and 2 blocks of slop for non-aligned writes.
+        // this really belongs lower down, since writei()
+        // might be writing a device like the console.
+        int max = ((LOGSIZE - 1 - 1 - 2) / 2) * 512;
+        int i = 0;
+        while (i < n) {
+            int n1 = n - i;
+            if (n1 > max)
+                n1 = max;
 
-      begin_trans();
-      ilock(f->ip);
-      if ((r = writei(f->ip, addr + i, f->off, n1)) > 0)
-        f->off += r;
-      iunlock(f->ip);
-      commit_trans();
+            begin_trans();
+            ilock(f->ip);
+            if ((r = writei(f->ip, addr + i, f->off, n1)) > 0)
+                f->off += r;
+            iunlock(f->ip);
+            commit_trans();
 
-      if(r < 0)
-        break;
-      if(r != n1)
-        panic("short filewrite");
-      i += r;
+            if (r < 0)
+                break;
+            if (r != n1)
+                panic("short filewrite");
+            i += r;
+        }
+        int spare = BLOCK_COMPELET - (n % BLOCK_COMPELET);
+
+
+        if (f->blockwrite && spare) {
+            cprintf("N is %d Spare is %d \n",n,spare);
+            begin_trans();
+            ilock(f->ip);
+            if ((r = writei(f->ip, blockfiller, f->off, spare)) > 0)
+                f->off += r;
+            iunlock(f->ip);
+            commit_trans();
+
+            if  (r != spare)
+                panic("short filewrite");
+        }
+        return i == n ? n : -1;
     }
-    return i == n ? n : -1;
-  }
-  panic("filewrite");
+    panic("filewrite");
 }
 

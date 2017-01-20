@@ -2,4 +2,5 @@
 #define O_WRONLY  0x001
 #define O_RDWR    0x002
 #define O_APPEND  0x004
+#define O_BLOCK_WRITE  0x008
 #define O_CREATE  0x200
