@@ -445,20 +445,3 @@ procdump(void) {
         cprintf("\n");
     }
 }
-
-
-
-int sem_open(char *name, int init, int maxVal);
-
-int sem_close(int sd);
-
-int sem_wait(int sd);
-
-int sem_try_wait(int sd);
-
-int sem_signal(int sd);
-
-int sem_gat_value(int sd, int *val, int *maxVal);
-
-int sem_unlink(int fd);
-

@@ -419,6 +419,7 @@ itrunc(struct inode *ip)
   iupdate(ip);
 }
 
+
 // Copy stat information from inode.
 void
 stati(struct inode *ip, struct stat *st)
@@ -487,7 +488,6 @@ writei(struct inode *ip, char *src, uint off, uint n)
 
   if(n > 0 && off > ip->size) {
     ip->size = off;
-    ip->off = off;
     iupdate(ip);
   }
   return n;

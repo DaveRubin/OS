@@ -25,7 +25,18 @@ main(int argc, char *argv[]) {
 }
 
 void testDeleteRange() {
-    delete_range(2,4,6);
+    char *string = "123";
+    int fd = open(deleteRangeFileName,O_WRONLY | O_CREATE | O_BLOCK_WRITE);
+    if (fd<0) {
+        printf(1,"failed opening file...\n");
+        exit();
+    }
+
+    printf(fd,string);
+
+    delete_range(fd,2,513);
+
+    close(fd);
 }
 
 void testBlockWrite() {

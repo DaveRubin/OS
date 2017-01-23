@@ -5,11 +5,14 @@
 #include "types.h"
 #include "defs.h"
 #include "param.h"
+#include "mmu.h"
+#include "proc.h"
 #include "fs.h"
 #include "file.h"
 #include "spinlock.h"
+#include "buf.h"
 
-#define BLOCK_COMPELET 512
+#define BLOCK_COMPLETE 512
 
 struct devsw devsw[NDEV];
 struct {
@@ -23,7 +26,7 @@ void
 fileinit(void)
 {
     initlock(&ftable.lock, "ftable");
-    memset(blockfiller, '_', BLOCK_COMPELET);
+    memset(blockfiller, '_', BLOCK_COMPLETE);
 }
 
 // Allocate a file structure.
@@ -153,7 +156,7 @@ filewrite(struct file *f, char *addr, int n) {
                 panic("short filewrite");
             i += r;
         }
-        int spare = BLOCK_COMPELET - (n % BLOCK_COMPELET);
+        int spare = BLOCK_COMPLETE - (n % BLOCK_COMPLETE);
         //ADDITION !
         if (f->blockwrite && spare) {
             //cprintf("N is %d Spare is %d \n",n,spare);
@@ -174,7 +177,67 @@ filewrite(struct file *f, char *addr, int n) {
 
 
 int
-delete_range(int fd ,int from,int to) {
-    //cprintf("HEllo from delete range!\n %d %d %d",fd ,from,to);
+delete_range(int fd ,int from,int till) {
+    int i;
+    int startblock = from/512;
+    int tillblock = till/512;
+    struct file *f = proc->ofile[fd];
+    struct inode *ip = f->ip;
+
+    //validate params
+    if (from < 0 || till < 0 || from > ip->size || till > ip->size)
+        return -2;
+    if (from > till)
+        return -3;
+
+    int delta = tillblock - startblock + 1 ;
+    cprintf("from %d \nuntil %d \ndelta %d\n",startblock,tillblock,delta);
+
+    begin_trans();
+    ilock(ip);
+    int hasNDirectData = ip->addrs[NDIRECT] != 0; //if has indirect, then an update should be needed
+
+    struct buf *bp = 0;
+    uint *ndirectArr = 0;
+
+    if (hasNDirectData) {
+        bp = bread(ip->dev, ip->addrs[NDIRECT]);
+        ndirectArr = (uint*)bp->data;
+    }
+
+    //if all correct run through the range and shift content
+    for (i = startblock; i < tillblock + 1; i++) {
+        cprintf("swapping %d -< %d",i,i+delta);
+        uint *source = getAddressAtBlock(ip,i,ndirectArr);
+        uint *target = getAddressAtBlock(ip,i+delta,ndirectArr);
+        //if reached end
+        if (*target == 0) {
+            break;
+        }
+        *source = *target;
+    }
+
+    int actualDelta = till - from;
+    cprintf("Actual delta is %d\nsize: %d\n",actualDelta,ip->size);
+    ip->size -= actualDelta;
+
+    //finish up..
+    iupdate(ip);
+    iunlock(ip);
+    commit_trans();
+
+    cprintf("new size: %d\n",ip->size);
+
     return 1;
+}
+
+uint *getAddressAtBlock(struct inode *ip,int blockIndex, uint *a) {
+    if (blockIndex < NDIRECT) {
+        cprintf("direct %d %d\n",blockIndex,ip->addrs[blockIndex]);
+        return &ip->addrs[blockIndex];
+    }
+    else {
+        blockIndex -= NDIRECT;
+        return &a[blockIndex];
+    }
 }

@@ -37,12 +37,12 @@ sys_kill(void)
 
 int
 sys_delete_range(void) {
-  int fd,from,till;
+    int fd, from, till;
 
-  if(argint(0, &fd) < 0 || argint(1, &from) < 0 || argint(2, &till) < 0)
-    return -1;
+    if (argint(0, &fd) < 0 || argint(1, &from) < 0 || argint(2, &till) < 0)
+        return -1;
 
-  return delete_range(fd,from,till);
+    return delete_range(fd, from, till);
 }
 
 int
