@@ -25,16 +25,18 @@ main(int argc, char *argv[]) {
 }
 
 void testDeleteRange() {
-    char *string = "123";
     int fd = open(deleteRangeFileName,O_WRONLY | O_CREATE | O_BLOCK_WRITE);
     if (fd<0) {
         printf(1,"failed opening file...\n");
         exit();
     }
 
-    printf(fd,string);
+    char *stringNdirect = "1234567890abc"; // the c should be in indirect
+    printf(fd,stringNdirect);
+//    char *stringDirect = "1234"; // the c should be in indirect
+//    printf(fd,stringDirect);
 
-    delete_range(fd,2,513);
+    delete_range(fd,2500,3400);
 
     close(fd);
 }

@@ -13,7 +13,6 @@
 #include "buf.h"
 
 #define BLOCK_COMPLETE 512
-
 struct devsw devsw[NDEV];
 struct {
   struct spinlock lock;
@@ -191,6 +190,9 @@ delete_range(int fd ,int from,int till) {
         return -3;
 
     int delta = tillblock - startblock + 1 ;
+    int endBlock = ip->size/512;
+    if (ip->size%512 == 0)
+        endBlock--;
     cprintf("from %d \nuntil %d \ndelta %d\n",startblock,tillblock,delta);
 
     begin_trans();
@@ -201,39 +203,43 @@ delete_range(int fd ,int from,int till) {
     uint *ndirectArr = 0;
 
     if (hasNDirectData) {
+        cprintf("Has indirect!\n");
         bp = bread(ip->dev, ip->addrs[NDIRECT]);
         ndirectArr = (uint*)bp->data;
     }
 
     //if all correct run through the range and shift content
-    for (i = startblock; i < tillblock + 1; i++) {
-        cprintf("swapping %d -< %d",i,i+delta);
+    for (i = startblock; i < endBlock + 1; i++) {
         uint *source = getAddressAtBlock(ip,i,ndirectArr);
         uint *target = getAddressAtBlock(ip,i+delta,ndirectArr);
-        //if reached end
-        if (*target == 0) {
-            break;
-        }
+        //swap content
+        uint tmp = *source;
         *source = *target;
+        *target = tmp;
     }
 
-    int actualDelta = till - from;
-    cprintf("Actual delta is %d\nsize: %d\n",actualDelta,ip->size);
-    ip->size -= actualDelta;
+    int actualDelta = (tillblock - startblock)*BSIZE;
+    //if we deleted the end block
+    if (till >= ip->size) {
+        actualDelta += ip->size % BSIZE;
+    }
+    else {
+        actualDelta += BSIZE;
+    }
 
+    ip->size -= actualDelta;
     //finish up..
-    iupdate(ip);
+    iclearaftersize(ip);
     iunlock(ip);
     commit_trans();
-
-    cprintf("new size: %d\n",ip->size);
 
     return 1;
 }
 
+
 uint *getAddressAtBlock(struct inode *ip,int blockIndex, uint *a) {
     if (blockIndex < NDIRECT) {
-        cprintf("direct %d %d\n",blockIndex,ip->addrs[blockIndex]);
+        //cprintf("direct %d %d\n",blockIndex,ip->addrs[blockIndex]);
         return &ip->addrs[blockIndex];
     }
     else {

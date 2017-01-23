@@ -420,6 +420,45 @@ itrunc(struct inode *ip)
 }
 
 
+void iclearaftersize(struct inode *ip) {
+    //get start index from file size
+    int startIndex = ip->size / BSIZE;
+    cprintf("START INDEX %d\n", startIndex);
+    int i, j;
+    struct buf *bp;
+    uint *a;
+
+    for (i = startIndex; i < NDIRECT; i++) {
+        if (ip->addrs[i]) {
+            bfree(ip->dev, ip->addrs[i]);
+            ip->addrs[i] = 0;
+        }
+        else
+            goto wrap_up;
+    }
+
+    if (ip->addrs[NDIRECT]) {
+        //update startIndex
+        startIndex -= NDIRECT;
+        bp = bread(ip->dev, ip->addrs[NDIRECT]);
+        a = (uint *) bp->data;
+        for (j = startIndex; j < NINDIRECT; j++) {
+            if (a[j])
+                bfree(ip->dev, a[j]);
+            else
+                goto wrap_up;
+
+        }
+        brelse(bp);
+        bfree(ip->dev, ip->addrs[NDIRECT]);
+        ip->addrs[NDIRECT] = 0;
+    }
+
+wrap_up:
+
+    iupdate(ip);
+}
+
 // Copy stat information from inode.
 void
 stati(struct inode *ip, struct stat *st)
