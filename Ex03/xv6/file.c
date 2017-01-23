@@ -184,6 +184,8 @@ delete_range(int fd ,int from,int till) {
     struct inode *ip = f->ip;
 
     //validate params
+    if (fd < 0)
+        return -1;
     if (from < 0 || till < 0 || from > ip->size || till > ip->size)
         return -2;
     if (from > till)
@@ -193,7 +195,7 @@ delete_range(int fd ,int from,int till) {
     int endBlock = ip->size/512;
     if (ip->size%512 == 0)
         endBlock--;
-    cprintf("from %d \nuntil %d \ndelta %d\n",startblock,tillblock,delta);
+    //cprintf("from %d \nuntil %d \ndelta %d\n",startblock,tillblock,delta);
 
     begin_trans();
     ilock(ip);
@@ -203,7 +205,7 @@ delete_range(int fd ,int from,int till) {
     uint *ndirectArr = 0;
 
     if (hasNDirectData) {
-        cprintf("Has indirect!\n");
+        //cprintf("Has indirect!\n");
         bp = bread(ip->dev, ip->addrs[NDIRECT]);
         ndirectArr = (uint*)bp->data;
     }
@@ -229,11 +231,11 @@ delete_range(int fd ,int from,int till) {
 
     ip->size -= actualDelta;
     //finish up..
-    iclearaftersize(ip);
+    icleanup(ip);
     iunlock(ip);
     commit_trans();
 
-    return 1;
+    return (tillblock - startblock);
 }
 
 

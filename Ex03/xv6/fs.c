@@ -420,10 +420,14 @@ itrunc(struct inode *ip)
 }
 
 
-void iclearaftersize(struct inode *ip) {
+/**
+ * Freeing up everything exceeding from file size
+ * @param ip
+ */
+void icleanup(struct inode *ip) {
     //get start index from file size
     int startIndex = ip->size / BSIZE;
-    cprintf("START INDEX %d\n", startIndex);
+    //cprintf("START INDEX %d\n", startIndex);
     int i, j;
     struct buf *bp;
     uint *a;
@@ -434,7 +438,7 @@ void iclearaftersize(struct inode *ip) {
             ip->addrs[i] = 0;
         }
         else
-            goto wrap_up;
+            goto reached_end;
     }
 
     if (ip->addrs[NDIRECT]) {
@@ -446,7 +450,7 @@ void iclearaftersize(struct inode *ip) {
             if (a[j])
                 bfree(ip->dev, a[j]);
             else
-                goto wrap_up;
+                goto reached_end;
 
         }
         brelse(bp);
@@ -454,7 +458,7 @@ void iclearaftersize(struct inode *ip) {
         ip->addrs[NDIRECT] = 0;
     }
 
-wrap_up:
+reached_end:
 
     iupdate(ip);
 }

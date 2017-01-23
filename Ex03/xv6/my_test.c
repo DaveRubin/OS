@@ -25,17 +25,30 @@ main(int argc, char *argv[]) {
 }
 
 void testDeleteRange() {
+
     int fd = open(deleteRangeFileName,O_WRONLY | O_CREATE | O_BLOCK_WRITE);
     if (fd<0) {
         printf(1,"failed opening file...\n");
         exit();
     }
 
-    char *stringNdirect = "1234567890abc"; // the c should be in indirect
+    char *stringNdirect = "1234567890abcd"; // the c&d should be in indirect reference
     printf(fd,stringNdirect);
-//    char *stringDirect = "1234"; // the c should be in indirect
-//    printf(fd,stringDirect);
 
+    int testArgumentA = delete_range(-1,0,0); //(arguments)
+    int testArgumentB = delete_range(fd,90000,0); //(from > size)
+    int testArgumentC = delete_range(fd,0,90000); //(till > size)
+    int testArgumentD = delete_range(fd,-1,0); //(from < 0)
+    int testArgumentE = delete_range(fd,0,-1); //(till < 0)
+    int testArgumentF = delete_range(fd,100,99); //(till < 0)
+
+    //check invalid input
+    printf(1,"Testing invalid input (arguments), should be -1 : got %d\n",testArgumentA);
+    printf(1,"Testing invalid input (from > size), should be -2 : got %d\n",testArgumentB);
+    printf(1,"Testing invalid input (till > size), should be -2 : got %d\n",testArgumentC);
+    printf(1,"Testing invalid input (from < 0), should be -2 : got %d\n",testArgumentD);
+    printf(1,"Testing invalid input (till < 0), should be -2 : got %d\n",testArgumentE);
+    printf(1,"Testing invalid input (from>till), should be -3 : got %d\n",testArgumentF);
     delete_range(fd,2500,3400);
 
     close(fd);
